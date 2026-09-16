@@ -629,7 +629,7 @@ export async function performAIExtraction(
   }
 
   const userPrompt = `Extract structured fields from this symptom description:\n\n"${normalizedText}"\n\nRespond ONLY with a raw JSON object. No markdown fences.`
-  const systemWithLang = language !== 'en' ? `${SYSTEM_PROMPT}\n\nIMPORTANT: All string values in the JSON should be in ${language}.` : SYSTEM_PROMPT
+  const systemWithLang = SYSTEM_PROMPT
 
   try {
     const response = await generateContentWithRotation(apiKeys, {
