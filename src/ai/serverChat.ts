@@ -1,4 +1,4 @@
-import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation'
+import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation.js'
 
 const SYSTEM_PROMPT = `You are HEALNEST AI, a compassionate, knowledgeable, and conversational AI health assistant.
 Your role is to help users understand health symptoms, answer wellness questions, explain physiological mechanisms, and guide them on what to do next.

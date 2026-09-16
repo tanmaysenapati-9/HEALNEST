@@ -1,5 +1,5 @@
-import { generateContentWithRotation, GEMINI_MODEL } from './keyRotation'
-import type { StructuredContext, AssessmentResult } from '../engine/types'
+import { generateContentWithRotation, GEMINI_MODEL } from './keyRotation.js'
+import type { StructuredContext, AssessmentResult } from '../engine/types.js'
 
 export async function performSummaryFormatting(
   context: StructuredContext,

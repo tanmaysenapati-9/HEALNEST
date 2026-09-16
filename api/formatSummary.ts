@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performSummaryFormatting } from '../src/ai/serverFormatSummary';
+import { performSummaryFormatting } from '../src/ai/serverFormatSummary.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { context, result: assessResult, language, caregiverContext } = req.body || {};
-    const apiKeys = [process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
+    const apiKeys = [process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
     
     const summaryText = await performSummaryFormatting(context, assessResult, language || 'en', apiKeys, caregiverContext);
     return res.status(200).json({ summary: summaryText });

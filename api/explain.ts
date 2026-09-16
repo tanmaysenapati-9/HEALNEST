@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performAIExplanation } from '../src/ai/serverExplanation';
+import { performAIExplanation } from '../src/ai/serverExplanation.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { outcome, reason, carePathwayTemplate, language, caregiverContext } = req.body || {};
-    const apiKeys = [process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
+    const apiKeys = [process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
     
     console.log('[HEALNEST BACKEND DEBUG] /api/explain called.');
     console.log(`[HEALNEST BACKEND DEBUG] Available API keys: ${apiKeys.length}`);

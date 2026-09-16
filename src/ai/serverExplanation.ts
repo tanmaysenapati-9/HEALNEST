@@ -1,6 +1,6 @@
-import { generateContentWithRotation, GEMINI_MODEL } from './keyRotation'
+import { generateContentWithRotation, GEMINI_MODEL } from './keyRotation.js'
 import { z } from 'zod'
-import type { AssessmentOutcome, CarePathwayTemplate } from '../engine/types'
+import type { AssessmentOutcome, CarePathwayTemplate } from '../engine/types.js'
 
 const ExplainedPathwaySchema = z.object({
   whatToDoNow: z.array(z.string()),

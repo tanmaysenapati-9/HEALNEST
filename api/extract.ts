@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performAIExtraction } from '../src/ai/serverExtractor';
+import { performAIExtraction } from '../src/ai/serverExtractor.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { text, language } = req.body || {};
-    const apiKeys = [process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
+    const apiKeys = [process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
     const result = await performAIExtraction(apiKeys, text, language || 'en');
     return res.status(200).json(result);
   } catch (err) {

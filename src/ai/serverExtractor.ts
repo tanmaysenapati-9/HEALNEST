@@ -1,10 +1,10 @@
-import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation'
+import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation.js'
 import {
   SymptomExtractionResultSchema,
   type SymptomExtractionResult,
-} from './extractionSchema'
-import type { SymptomCategory } from '../engine/types'
-import { normalizeToEnglish } from './languageNormalizer'
+} from './extractionSchema.js'
+import type { SymptomCategory } from '../engine/types.js'
+import { normalizeToEnglish } from './languageNormalizer.js'
 
 const ALL_CATEGORIES: SymptomCategory[] = [
   'burn',

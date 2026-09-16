@@ -1,4 +1,4 @@
-import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation'
+import { generateContentWithRotation, DEFAULT_GEMINI_MODEL } from './keyRotation.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SCRIPT DETECTION (Unicode range checks — zero external dependencies)

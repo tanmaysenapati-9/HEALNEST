@@ -31,7 +31,7 @@ function apiExtractPlugin(): Plugin {
           try {
             const { text, language } = JSON.parse(body || '{}')
             const env = loadEnv(server.config.mode, process.cwd(), '')
-            const apiKeys = [env.GEMINI_API_KEY_1, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
+            const apiKeys = [env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
             const result = await performAIExtraction(apiKeys, text, language || 'en')
             res.setHeader('Content-Type', 'application/json')
             res.statusCode = 200
@@ -62,7 +62,7 @@ function apiExtractPlugin(): Plugin {
           try {
             const { outcome, reason, carePathwayTemplate, language, caregiverContext } = JSON.parse(body || '{}')
             const env = loadEnv(server.config.mode, process.cwd(), '')
-            const apiKeys = [env.GEMINI_API_KEY_1, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
+            const apiKeys = [env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
             
             console.log('[HEALNEST BACKEND DEBUG] /api/explain called.')
             console.log(`[HEALNEST BACKEND DEBUG] Available API keys: ${apiKeys.length}`)
@@ -98,7 +98,7 @@ function apiExtractPlugin(): Plugin {
           try {
             const { context, result: assessResult, language, caregiverContext } = JSON.parse(body || '{}')
             const env = loadEnv(server.config.mode, process.cwd(), '')
-            const apiKeys = [env.GEMINI_API_KEY_1, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
+            const apiKeys = [env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
             
             const summaryText = await performSummaryFormatting(context, assessResult, language || 'en', apiKeys, caregiverContext)
             res.setHeader('Content-Type', 'application/json')
@@ -131,7 +131,7 @@ function apiExtractPlugin(): Plugin {
           try {
             const { history, newMessage, language } = JSON.parse(body || '{}')
             const env = loadEnv(server.config.mode, process.cwd(), '')
-            const apiKeys = [env.GEMINI_API_KEY_1, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
+            const apiKeys = [env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY, env.GEMINI_API_KEY_2, env.GEMINI_API_KEY_3].filter(Boolean) as string[]
 
             console.log(`[HEALNEST CHAT API] /api/chat called. Keys configured: ${apiKeys.length}. Message: "${String(newMessage).substring(0, 80)}"`)
 

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performAIChat } from '../src/ai/serverChat';
+import { performAIChat } from '../src/ai/serverChat.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { history, newMessage, language } = req.body || {};
-    const apiKeys = [process.env.GEMINI_API_KEY_1, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
+    const apiKeys = [process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2, process.env.GEMINI_API_KEY_3].filter(Boolean) as string[];
 
     console.log(`[HEALNEST CHAT API] /api/chat called. Keys configured: ${apiKeys.length}. Message: "${String(newMessage).substring(0, 80)}"`);
 
