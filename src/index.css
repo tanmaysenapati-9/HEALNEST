@@ -1,0 +1,279 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== HEALNEST Global Styles — Design Excellence Pass ===== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans;
+  }
+
+  /* Dark mode defaults */
+  .dark body {
+    @apply bg-heal-bg text-heal-text;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(34, 211, 238, 0.03), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.03), transparent 25%);
+    background-attachment: fixed;
+  }
+
+  /* Light mode */
+  body {
+    @apply bg-heal-light text-heal-text-light;
+  }
+
+  /* Accessible styled focus states on all interactive elements */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #0a0e1a, 0 0 0 4px #3b82f6;
+  }
+
+  /* Custom sleek dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0e1a;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.35), rgba(139, 92, 246, 0.35));
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.65), rgba(139, 92, 246, 0.65));
+  }
+}
+
+@layer components {
+
+  /* Display typography */
+  .font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* ===== AMBIENT BACKGROUND GLOW BLOBS =====
+     Fixed-position, large radial gradients that create the illusion
+     of diffused light sources behind all content. */
+  .ambient-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .ambient-glow::before,
+  .ambient-glow::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  /* Blue glow — top-left light source */
+  .ambient-glow::before {
+    width: 800px;
+    height: 800px;
+    top: -15%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 60%);
+    filter: blur(100px);
+    animation: ambient-drift 20s ease-in-out infinite;
+  }
+
+  /* Purple glow — center-right light source */
+  .ambient-glow::after {
+    width: 700px;
+    height: 700px;
+    top: 25%;
+    right: -15%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 60%);
+    filter: blur(120px);
+    animation: ambient-drift 25s ease-in-out infinite reverse;
+  }
+
+  /* Third glow blob */
+  .ambient-glow-extra {
+    position: fixed;
+    bottom: -5%;
+    left: 30%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.06) 0%, transparent 70%);
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: ambient-drift 30s ease-in-out infinite;
+  }
+
+  /* ===== GLASSMORPHISM CARD ===== */
+  .glass-card {
+    @apply rounded-2xl backdrop-blur-xl;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .dark .glass-card {
+    background: rgba(8, 13, 26, 0.5); /* heal-bg-card with opacity */
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(34, 211, 238, 0.03),
+      inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card {
+    @apply bg-heal-light-card/95;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  /* ===== GRADIENT TEXT ===== */
+  .gradient-text {
+    background: linear-gradient(135deg, #22d3ee, #8b5cf6, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* ===== PRIMARY BUTTON — gradient + emitted glow + scale hover ===== */
+  .btn-primary {
+    background-image: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    @apply text-white font-semibold rounded-xl
+           transition-all duration-300 ease-out
+           active:scale-[0.97] cursor-pointer;
+    box-shadow:
+      0 4px 15px rgba(139, 92, 246, 0.3),
+      0 0 30px rgba(59, 130, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-25deg);
+    transition: all 0.7s ease;
+  }
+
+  .btn-primary:hover {
+    background-image: linear-gradient(135deg, #2563eb, #a855f7);
+    box-shadow:
+      0 6px 20px rgba(139, 92, 246, 0.45),
+      0 0 40px rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px) scale(1.02);
+  }
+  
+  .btn-primary:hover::after {
+    left: 200%;
+  }
+
+  /* ===== OUTLINE BUTTON — glass border + subtle glow on hover ===== */
+  .btn-outline {
+    @apply font-semibold rounded-xl
+           transition-all duration-200 ease-out
+           active:scale-[0.98] cursor-pointer bg-transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+  }
+
+  .btn-outline:hover {
+    border-color: rgba(59, 130, 246, 0.45);
+    color: #60a5fa;
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.15);
+    transform: scale(1.01);
+  }
+
+  /* ===== GLOW RADIAL — hero background ===== */
+  .glow-radial {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(59, 130, 246, 0.18) 0%,
+      rgba(139, 92, 246, 0.10) 35%,
+      rgba(34, 211, 238, 0.04) 60%,
+      transparent 75%
+    );
+  }
+
+  /* ===== SIDEBAR NAV LINK ===== */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+           transition-all duration-200 ease-out cursor-pointer;
+  }
+
+  .dark .sidebar-link {
+    @apply text-heal-text-muted hover:text-white;
+  }
+
+  .dark .sidebar-link:hover {
+    background: rgba(26, 34, 54, 0.8);
+    transform: translateX(2px);
+  }
+
+  .sidebar-link {
+    @apply text-heal-text-light-muted hover:bg-heal-light-secondary hover:text-heal-text-light;
+  }
+
+  .sidebar-link.active {
+    background-image: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(139, 92, 246, 0.15));
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    @apply text-white;
+    box-shadow:
+      0 0 20px rgba(34, 211, 238, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* ===== ICON BADGE — glass gradient with glow border ===== */
+  .icon-badge {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl
+           transition-all duration-200 ease-out;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow:
+      0 0 20px rgba(99, 102, 241, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .icon-badge-solid {
+    @apply w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl
+           transition-all duration-200 ease-out;
+    background-image: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    box-shadow:
+      0 4px 16px rgba(99, 102, 241, 0.3),
+      0 0 30px rgba(59, 130, 246, 0.1);
+  }
+
+  /* ===== ECG ANIMATION ===== */
+  .animate-ecg-draw {
+    animation: ecg-draw 3.5s linear infinite;
+  }
+}
+
+@keyframes ecg-draw {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
