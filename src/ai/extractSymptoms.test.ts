@@ -196,3 +196,174 @@ describe('HEALNEST AI NLU Layer (Typo-Tolerant & Semantic Symptom Detection)', (
     })
   })
 })
+
+// =============================================================================
+// MULTILINGUAL TESTS — Hindi (Devanagari) & Tamil script detection
+// These tests use the static dictionary path (no API calls needed).
+// =============================================================================
+import { detectScript, normalizeToEnglish, containsDevanagari, containsTamil } from './languageNormalizer'
+
+describe('Script Detection', () => {
+  it('detects Devanagari script (Hindi)', () => {
+    expect(containsDevanagari('मुझे बुखार है')).toBe(true)
+    expect(detectScript('मुझे बुखार है')).toBe('devanagari')
+  })
+
+  it('detects Tamil script', () => {
+    expect(containsTamil('எனக்கு காய்ச்சல் உள்ளது')).toBe(true)
+    expect(detectScript('எனக்கு காய்ச்சல் உள்ளது')).toBe('tamil')
+  })
+
+  it('identifies English/Latin as latin script', () => {
+    expect(detectScript('I have fever')).toBe('latin')
+    expect(detectScript('tooth hurts')).toBe('latin')
+  })
+
+  it('identifies Hinglish (Latin script Hindi) as latin', () => {
+    expect(detectScript('mujhe bukhar hai')).toBe('latin')
+  })
+})
+
+describe('Hindi Symptom Static Dictionary (normalizeToEnglish)', () => {
+  const hindiCases: Array<[string, string]> = [
+    ['मुझे बुखार है', 'fever'],
+    ['मेरे दांत में दर्द है', 'tooth'],
+    ['मुझे सिरदर्द है', 'headache'],
+    ['मुझे पेट दर्द है', 'stomach'],
+    ['मुझे खांसी है', 'cough'],
+    ['मुझे उल्टी हो रही है', 'vomit'],
+    ['मुझे दस्त हैं', 'diarrhea'],
+    ['मुझे चक्कर आ रहे हैं', 'dizzy'],
+    ['सीने में दर्द है', 'chest pain'],
+    ['कमर में दर्द है', 'back pain'],
+    ['मुझे थकान है', 'fatigue'],
+    ['जोड़ों में दर्द है', 'joint'],
+  ]
+
+  hindiCases.forEach(([input, expectedKeyword]) => {
+    it(`"${input}" translates to contain "${expectedKeyword}"`, async () => {
+      const result = await normalizeToEnglish(input, [])
+      expect(result.wasTranslated).toBe(true)
+      expect(result.detectedScript).toBe('devanagari')
+      expect(result.normalizedEnglish.toLowerCase()).toContain(expectedKeyword)
+    })
+  })
+})
+
+describe('Tamil Symptom Static Dictionary (normalizeToEnglish)', () => {
+  const tamilCases: Array<[string, string]> = [
+    ['எனக்கு காய்ச்சல் உள்ளது', 'fever'],
+    ['என் பல் வலிக்கிறது', 'tooth'],
+    ['எனக்கு தலைவலி இருக்கிறது', 'headache'],
+    ['எனக்கு வயிற்று வலி உள்ளது', 'stomach'],
+    ['எனக்கு இருமல் உள்ளது', 'cough'],
+    ['எனக்கு வாந்தி வருகிறது', 'vomit'],
+    ['எனக்கு வயிற்றுப்போக்கு உள்ளது', 'diarrhea'],
+    ['எனக்கு தலைச்சுற்றல் இருக்கிறது', 'dizzy'],
+    ['நெஞ்சு வலிக்கிறது', 'chest pain'],
+    ['முதுகு வலிக்கிறது', 'back pain'],
+    ['எனக்கு சோர்வாக இருக்கிறது', 'fatigue'],
+    ['மூட்டு வலிக்கிறது', 'joint'],
+  ]
+
+  tamilCases.forEach(([input, expectedKeyword]) => {
+    it(`"${input}" translates to contain "${expectedKeyword}"`, async () => {
+      const result = await normalizeToEnglish(input, [])
+      expect(result.wasTranslated).toBe(true)
+      expect(result.detectedScript).toBe('tamil')
+      expect(result.normalizedEnglish.toLowerCase()).toContain(expectedKeyword)
+    })
+  })
+})
+
+describe('Hindi→English→Category integration (static path via fallbackHeuristicExtraction)', () => {
+  const integrationCases: Array<[string, string, string]> = [
+    ['मुझे बुखार है', 'fever', 'Hindi: fever'],
+    ['मुझे सिरदर्द है', 'headache', 'Hindi: headache'],
+    ['मेरे दांत में दर्द है', 'toothache_dental_pain', 'Hindi: tooth pain'],
+    ['मुझे पेट दर्द है', 'stomach_pain', 'Hindi: stomach pain'],
+    ['मुझे खांसी है', 'cough', 'Hindi: cough'],
+  ]
+
+  integrationCases.forEach(([input, expectedCategory, label]) => {
+    it(`${label} → ${expectedCategory}`, async () => {
+      const norm = await normalizeToEnglish(input, [])
+      const result = fallbackHeuristicExtraction(norm.normalizedEnglish)
+      expect(result.category).toBe(expectedCategory)
+      expect(result.confidence).toBe('high')
+    })
+  })
+})
+
+describe('Tamil→English→Category integration (static path via fallbackHeuristicExtraction)', () => {
+  const integrationCases: Array<[string, string, string]> = [
+    ['எனக்கு காய்ச்சல் உள்ளது', 'fever', 'Tamil: fever'],
+    ['எனக்கு தலைவலி இருக்கிறது', 'headache', 'Tamil: headache'],
+    ['என் பல் வலிக்கிறது', 'toothache_dental_pain', 'Tamil: tooth pain'],
+    ['எனக்கு வயிற்று வலி உள்ளது', 'stomach_pain', 'Tamil: stomach pain'],
+    ['எனக்கு இருமல் உள்ளது', 'cough', 'Tamil: cough'],
+  ]
+
+  integrationCases.forEach(([input, expectedCategory, label]) => {
+    it(`${label} → ${expectedCategory}`, async () => {
+      const norm = await normalizeToEnglish(input, [])
+      const result = fallbackHeuristicExtraction(norm.normalizedEnglish)
+      expect(result.category).toBe(expectedCategory)
+      expect(result.confidence).toBe('high')
+    })
+  })
+})
+
+describe('State isolation: English → Hindi → Tamil sequential checks', () => {
+  it('English does not affect Hindi result', async () => {
+    const engResult = fallbackHeuristicExtraction('I have fever')
+    expect(engResult.category).toBe('fever')
+
+    const hindiNorm = await normalizeToEnglish('मुझे सिरदर्द है', [])
+    const hindiResult = fallbackHeuristicExtraction(hindiNorm.normalizedEnglish)
+    expect(hindiResult.category).toBe('headache') // not fever
+  })
+
+  it('Hindi does not affect Tamil result', async () => {
+    const hindiNorm = await normalizeToEnglish('मेरे दांत में दर्द है', [])
+    const hindiResult = fallbackHeuristicExtraction(hindiNorm.normalizedEnglish)
+    expect(hindiResult.category).toBe('toothache_dental_pain')
+
+    const tamilNorm = await normalizeToEnglish('எனக்கு காய்ச்சல் உள்ளது', [])
+    const tamilResult = fallbackHeuristicExtraction(tamilNorm.normalizedEnglish)
+    expect(tamilResult.category).toBe('fever') // not toothache
+  })
+
+  it('Tamil does not affect English result', async () => {
+    const tamilNorm = await normalizeToEnglish('எனக்கு வயிற்று வலி உள்ளது', [])
+    const tamilResult = fallbackHeuristicExtraction(tamilNorm.normalizedEnglish)
+    expect(tamilResult.category).toBe('stomach_pain')
+
+    // English runs fresh — no state from Tamil
+    const engResult = fallbackHeuristicExtraction('I have a headache')
+    expect(engResult.category).toBe('headache') // not stomach_pain
+  })
+})
+
+describe('Multi-symptom Hindi input', () => {
+  it('"मुझे बुखार और सिरदर्द है" detects fever as primary', async () => {
+    const norm = await normalizeToEnglish('मुझे बुखार और सिरदर्द है', [])
+    // Both words should appear in the normalized text
+    expect(norm.normalizedEnglish.toLowerCase()).toMatch(/fever|headache/)
+  })
+})
+
+describe('Latin/English input is never accidentally translated', () => {
+  it('English text passes through unchanged', async () => {
+    const result = await normalizeToEnglish('I have a headache', [])
+    expect(result.wasTranslated).toBe(false)
+    expect(result.detectedScript).toBe('latin')
+    expect(result.normalizedEnglish).toBe('I have a headache')
+  })
+
+  it('Typo English "gastic" passes through unchanged', async () => {
+    const result = await normalizeToEnglish('I have gastic', [])
+    expect(result.wasTranslated).toBe(false)
+    expect(result.normalizedEnglish).toBe('I have gastic')
+  })
+})

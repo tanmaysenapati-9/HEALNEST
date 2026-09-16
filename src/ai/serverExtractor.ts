@@ -4,6 +4,7 @@ import {
   type SymptomExtractionResult,
 } from './extractionSchema'
 import type { SymptomCategory } from '../engine/types'
+import { normalizeToEnglish } from './languageNormalizer'
 
 const ALL_CATEGORIES: SymptomCategory[] = [
   'burn',
@@ -590,11 +591,44 @@ export async function performAIExtraction(
     return { category: 'unrecognized', extractedFields: {}, originalText: text, confidence: 'low' }
   }
 
-  if (!apiKeys || apiKeys.length === 0 || (apiKeys.length === 1 && (apiKeys[0].trim() === '' || apiKeys[0].includes('PLACEHOLDER')))) {
-    return fallbackHeuristicExtraction(trimmed)
+  // ── Multilingual Normalization ────────────────────────────────────────────
+  // Detect Hindi (Devanagari) or Tamil script and translate to English before
+  // running any regex heuristics or LLM extraction. The original verbatim text
+  // is preserved in `originalText` for UI display.
+  const noKeys = !apiKeys || apiKeys.length === 0 ||
+    (apiKeys.length === 1 && (apiKeys[0].trim() === '' || apiKeys[0].includes('PLACEHOLDER')))
+
+  let normalizedText = trimmed
+  if (!noKeys) {
+    try {
+      const normResult = await normalizeToEnglish(trimmed, apiKeys)
+      if (normResult.wasTranslated) {
+        console.log(`[HEALNEST NLU] Language normalized (${normResult.detectedScript}): "${trimmed}" → "${normResult.normalizedEnglish}"`)
+      }
+      normalizedText = normResult.normalizedEnglish
+    } catch (normErr) {
+      console.warn('[HEALNEST NLU] Language normalization failed, using original text:', normErr)
+    }
+  } else {
+    // No API keys — still try static dictionary for offline Hindi/Tamil support
+    try {
+      const normResult = await normalizeToEnglish(trimmed, [])
+      if (normResult.wasTranslated) {
+        normalizedText = normResult.normalizedEnglish
+      }
+    } catch {
+      // ignore
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  if (noKeys) {
+    // Run heuristic on normalized text, but return originalText for the UI
+    const result = fallbackHeuristicExtraction(normalizedText)
+    return { ...result, originalText: trimmed }
   }
 
-  const userPrompt = `Extract structured fields from this symptom description:\n\n"${trimmed}"\n\nRespond ONLY with a raw JSON object. No markdown fences.`
+  const userPrompt = `Extract structured fields from this symptom description:\n\n"${normalizedText}"\n\nRespond ONLY with a raw JSON object. No markdown fences.`
   const systemWithLang = language !== 'en' ? `${SYSTEM_PROMPT}\n\nIMPORTANT: All string values in the JSON should be in ${language}.` : SYSTEM_PROMPT
 
   try {
@@ -610,6 +644,7 @@ export async function performAIExtraction(
     const rawText = response.text || ''
     const cleaned = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
     const parsedData = JSON.parse(cleaned)
+    // Always attach the original (possibly non-Latin) user text
     const parsed = SymptomExtractionResultSchema.safeParse({ ...parsedData, originalText: trimmed })
 
     if (parsed.success && parsed.data.category !== 'unrecognized') {
@@ -617,14 +652,15 @@ export async function performAIExtraction(
     }
 
     // If model returned unrecognized or unparseable, check deterministic heuristic before giving up
-    const heuristicResult = fallbackHeuristicExtraction(trimmed)
+    const heuristicResult = fallbackHeuristicExtraction(normalizedText)
     if (heuristicResult.category !== 'unrecognized') {
-      return heuristicResult
+      return { ...heuristicResult, originalText: trimmed }
     }
 
-    return parsed.success ? parsed.data : heuristicResult
+    return parsed.success ? parsed.data : { ...heuristicResult, originalText: trimmed }
   } catch (error) {
     console.error('[HEALNEST NLU Error] AI extraction failed, falling back to heuristic:', error)
-    return fallbackHeuristicExtraction(trimmed)
+    const heuristicResult = fallbackHeuristicExtraction(normalizedText)
+    return { ...heuristicResult, originalText: trimmed }
   }
 }
